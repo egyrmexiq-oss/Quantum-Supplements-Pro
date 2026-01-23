@@ -143,7 +143,7 @@ with st.sidebar:
         else: st.info("Sin resultados.")
 
     st.markdown("---")
-    st.link_button("📝 Regístrate como Médico", URL_FORMULARIO)
+    st.link_button("📝 Regístrate como Experto en Nutrición", URL_FORMULARIO)
 
 # ==========================================
 # 💬 4. CHAT PRINCIPAL
