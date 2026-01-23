@@ -103,16 +103,13 @@ with st.sidebar:
     
     st.success(f"Hola, {st.session_state.usuario_activo}")
     
-    # Contador de Visitas
-    st.markdown("---")
-    st.markdown("""
-    <div style="background-color: #262730; padding: 10px; border-radius: 5px; text-align: center;">
-        <span style="color: white; font-weight: bold;">📊 Visitas:</span>
-       st.markdown( '<img src="https://api.visitorbadge.io/api/visitors?path=quantum-supplements-mx&countColor=%23ff5733&style=flat&label=Visitas" style="height: 20px;">',
+    # --- CONTADOR DE VISITAS (Corregido) ---
+st.sidebar.divider() # Una linea divisoria bonita
+st.sidebar.write("📊 **Monitor de Tráfico**") # El título
+st.sidebar.markdown(
+    '<img src="https://api.visitorbadge.io/api/visitors?path=quantum-supplements-mx&countColor=%23ff5733&style=flat&label=Visitas" style="height: 25px;">',
     unsafe_allow_html=True
 )
-    </div>
-    """, unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("### ⚙️ Ajustes")
