@@ -151,7 +151,7 @@ with st.sidebar:
 # 💬 4. CHAT PRINCIPAL
 # ==========================================
 
-st.markdown('<h1 style="text-align: center; color: #00C2FF;">Quantum AI Health</h1>', unsafe_allow_html=True)
+st.markdown('<h1 style="text-align: center; color: #00C2FF;">Quantum AI Supplements</h1>', unsafe_allow_html=True)
 st.caption(f"Asistente Médico Inteligente - Nivel {nivel}")
 
 if "mensajes" not in st.session_state: 
