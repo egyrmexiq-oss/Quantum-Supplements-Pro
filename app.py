@@ -106,8 +106,7 @@ with st.sidebar:
     # --- CONTADOR DE VISITAS (Corregido) ---
 st.sidebar.divider() # Una linea divisoria bonita
 st.sidebar.write("📊 **Monitor de Tráfico**") # El título
-st.sidebar.markdown(
-    '<img src="https://api.visitorbadge.io/api/visitors?path=quantum-supplements-mx&countColor=%23ff5733&style=flat&label=Visitas" style="height: 25px;">',
+st.sidebar.markdown('<img src="https://api.visitorbadge.io/api/visitors?path=quantum-supplements-mx&countColor=%23ff5733&style=flat&label=Visitas" style="height: 25px;">',
     unsafe_allow_html=True
 )
     
