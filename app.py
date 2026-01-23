@@ -108,7 +108,9 @@ with st.sidebar:
     st.markdown("""
     <div style="background-color: #262730; padding: 10px; border-radius: 5px; text-align: center;">
         <span style="color: white; font-weight: bold;">📊 Visitas:</span>
-       st.markdown('<img src="https://api.visitorbadge.io/api/visitors?path=quantum-supplements-mx&countColor=%23ff5733&style=flat&label=Visitas" style="height: 20px;">'; unsafe_allow_html=True)
+       st.markdown( '<img src="https://api.visitorbadge.io/api/visitors?path=quantum-supplements-mx&countColor=%23ff5733&style=flat&label=Visitas" style="height: 20px;">',
+    unsafe_allow_html=True
+)
     </div>
     """, unsafe_allow_html=True)
     
