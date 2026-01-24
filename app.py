@@ -110,20 +110,17 @@ if not st.session_state.usuario_activo:
 stats = gestionar_estadisticas("leer")
 
 with st.sidebar:
-    # 1. LOGO (Centrado usando columnas invisibles)
+    # 1. LOGO GIGANTE
     try:
-        # Creamos 3 columnas: margen, centro ancho, margen
-        # [1, 4, 1] hace que el centro sea 4 veces más ancho que los lados
-        c_izq, c_centro, c_der = st.columns([1, 4, 1])
-        with c_centro:
-            # use_container_width=True hace que la imagen llene el espacio central
-            st.image("logo_quantum.png", use_container_width=True) 
+        # CAMBIO CLAVE: Quitamos las columnas y usamos 'use_container_width=True' directo.
+        # Esto forzará a la imagen a ocupar TODO el ancho disponible de la barra.
+        st.image("logo_quantum.png", use_container_width=True) 
     except:
-        # Si falla la imagen, mostramos texto centrado
-        st.markdown("<h2 style='text-align: center;'>🧬 Quantum</h2>", unsafe_allow_html=True)
+        # Texto alternativo centrado y grande si no carga la imagen
+        st.markdown("<h1 style='text-align: center;'>🧬 Quantum</h1>", unsafe_allow_html=True)
 
-    # Espaciador
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Espaciador sutil
+    st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
     
     # 2. CAJA DE USUARIO (Estilo HTML Verde Compacto)
