@@ -104,29 +104,9 @@ if not st.session_state.usuario_activo:
             st.rerun()
     st.stop()
 
-# ==========================================
-# 6. SIDEBAR
-# ==========================================
-stats = gestionar_estadisticas("leer")
-with st.sidebar:
-    st.success(f"👤 {st.session_state.usuario_activo}")
-    c1, c2 = st.columns(2)
-    c1.metric("Sesiones", stats["sesiones_totales"])
-    c2.metric("Consultas", stats["consultas_totales"])
-    
-    st.markdown("---")
-    nivel = st.radio("Nivel IA:", ["Básica", "Media", "Experta"])
-    
-    with st.expander("📂 Recursos"):
+with st.expander("📂 Recursos"):
         st.link_button("📝 Alta", "https://forms.google.com/...") 
         st.link_button("📊 Datos", "https://docs.google.com/spreadsheets/...")
-    
-    if st.button("🗑️ Borrar"):
-        st.session_state.messages = []
-        st.session_state.alerta_fijada = None
-        st.session_state.validaciones_ok = set()
-        st.rerun()
-
 # ==========================================
 # 7. INTERFAZ PRINCIPAL
 # ==========================================
