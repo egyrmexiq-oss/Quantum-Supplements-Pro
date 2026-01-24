@@ -144,9 +144,7 @@ if st.session_state.alerta_fijada:
     st.link_button(f"🩺 Contactar {val['esp']}", "https://quantum-health.streamlit.app", type="primary")
 
 # Portada
-if not st.session_state.messages and not st.session_state.alerta_fijada:
-    try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=350)
-    except: pass
+
 
 # Historial
 
