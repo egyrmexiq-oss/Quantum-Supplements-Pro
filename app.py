@@ -69,15 +69,15 @@ def gestionar_estadisticas(tipo="leer"):
     return data
 
 # ==========================================
-# 3. CONEXIÓN NEURONAL
+# 3. CONEXIÓN NEURONAL (MODELO ACTUALIZADO)
 # ==========================================
 try:
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         
-        # ⚠️ AQUÍ PUEDES CAMBIAR EL NOMBRE DEL MODELO SI PREFIERES OTRO
-        # Opciones: 'gemini-1.5-flash', 'gemini-2.0-flash-exp'
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        # ⚠️ CAMBIO CRÍTICO: Usamos el modelo 2.0 Flash Experimental
+        # Este es el nombre técnico correcto para "Gemini 2 Flash"
+        model = genai.GenerativeModel('gemini-2.0-flash-exp') 
     else:
         st.error("⚠️ Error: No encuentro 'GEMINI_API_KEY' en secrets.toml")
         st.stop()
@@ -138,8 +138,8 @@ with st.sidebar:
     with st.expander("📂 Recursos Administrativos"):
         st.caption("Enlaces Rápidos:")
         # Pega tus enlaces reales aquí
-        st.link_button("📝 Formulario de Alta", "https://forms.google.com/...") 
-        st.link_button("📊 Hoja de Cálculo", "https://docs.google.com/spreadsheets/...")
+        st.link_button("📝 Formulario de Alta", "https://forms.google.com/tu-link") 
+        st.link_button("📊 Hoja de Cálculo", "https://docs.google.com/spreadsheets/d/tu-link")
     
     st.markdown("---")
     if st.button("🗑️ Reiniciar Chat"):
@@ -206,8 +206,8 @@ if user_input:
                     # Agregamos a la lista blanca para que NO vuelva a preguntar
                     st.session_state.validaciones_ok.add(sup)
                     
-                    # Mensaje de confirmación
-                    st.session_state.messages.append({"role": "assistant", "content": f"✅ Validación completada para **{sup}**. Procesando..."})
+                    # Mensaje de confirmación en el historial
+                    # IMPORTANTE: NO hacemos append de mensaje aquí para que sea más limpio
                     st.rerun() # Recargamos para que el código fluya limpio
                 
                 # OPCIÓN B: SÍ TENGO RIESGO
@@ -223,7 +223,7 @@ if user_input:
     # 3. RESPUESTA IA (Solo si no hay bloqueo de seguridad activo)
     if not bloqueo_seguridad:
         with st.chat_message("assistant"):
-            with st.spinner("🧠 Analizando con IA..."):
+            with st.spinner("🧠 Analizando con Gemini 2.0..."):
                 try:
                     prompt = f"""
                     Actúa como Experto en Suplementos de Quantum Health.
@@ -243,8 +243,6 @@ if user_input:
                     err_msg = f"⚠️ **Error de IA:** {str(e)}"
                     st.error(err_msg)
                     st.session_state.messages.append({"role": "assistant", "content": err_msg})
-    # Recargamos para ver el resultado
-    st.rerun()
 
 
 
