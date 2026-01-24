@@ -81,7 +81,7 @@ try:
     # Buscamos la clave correcta GEMINI_API_KEY
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash')
     else:
         st.error("⚠️ Error: No encuentro 'GEMINI_API_KEY' en secrets.toml")
         st.stop()
