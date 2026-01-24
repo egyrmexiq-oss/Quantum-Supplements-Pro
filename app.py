@@ -104,9 +104,69 @@ if not st.session_state.usuario_activo:
             st.rerun()
     st.stop()
 
-with st.expander("📂 Recursos"):
-        st.link_button("📝 Alta", "https://forms.google.com/...") 
-        st.link_button("📊 Datos", "https://docs.google.com/spreadsheets/...")
+# ==========================================
+# 6. SIDEBAR (NUEVO ESTILO HEALTH + LOGO)
+# ==========================================
+stats = gestionar_estadisticas("leer")
+
+with st.sidebar:
+    # 1. LOGO DE LA MARCA (Archivo Local)
+    # IMPORTANTE: Asegúrate de subir tu archivo 'logo_quantum.png' a la carpeta
+    try:
+        st.image("logo_quantum.png", width=120) 
+    except:
+        st.header("🧬 Quantum")
+
+    st.markdown("---")
+    
+    # 2. CAJA DE USUARIO (Estilo HTML Verde Compacto)
+    st.markdown(f"""
+    <div style="background-color: #1b5e20; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        👤 {st.session_state.usuario_activo}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # 3. CONTADOR ESTILO "BADGE"
+    total_visitas = stats["sesiones_totales"]
+    st.markdown(f"""
+    <div style="display: flex; justify-content: center;">
+        <img src="https://img.shields.io/badge/VISITAS_TOTALES-{total_visitas}-00c853?style=for-the-badge&logo=google-analytics&logoColor=white" alt="Visitas">
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # 4. SECCIÓN AJUSTES
+    st.subheader("⚙️ Panel de Control")
+    nivel = st.radio("Nivel de Detalle IA:", ["Básica", "Media", "Experta"], index=1)
+    
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("🧹 Limpiar Chat", use_container_width=True):
+            st.session_state.messages = []
+            st.session_state.alerta_fijada = None
+            st.session_state.validaciones_ok = set()
+            st.rerun()
+            
+    with col_btn2:
+        # BOTÓN SALIR
+        if st.button("🔒 Salir", type="primary", use_container_width=True):
+            st.session_state.usuario_activo = None
+            st.session_state.messages = []
+            st.session_state.validaciones_ok = set()
+            st.rerun()
+
+    # 5. RECURSOS
+    st.markdown("---")
+    with st.expander("📂 Directorio y Recursos"):
+        st.link_button("📝 Formulario de Alta", "https://forms.google.com/") 
+        st.link_button("📊 Base de Datos", "https://docs.google.com/spreadsheets/")
+
+    st.divider()
+    st.caption("© 2026 Quantum AI Systems v6.0")
+
 # ==========================================
 # 7. INTERFAZ PRINCIPAL
 # ==========================================
@@ -123,11 +183,10 @@ if st.session_state.alerta_fijada:
     """, unsafe_allow_html=True)
     st.link_button(f"🩺 Contactar {val['esp']}", "https://quantum-health.streamlit.app", type="primary")
 
-# Portada
-
-
 # Historial
-
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 # ==========================================
 # 8. CEREBRO CUÁNTICO (LÓGICA CORREGIDA)
@@ -137,49 +196,39 @@ if st.session_state.alerta_fijada:
 if prompt := st.chat_input("Consulta sobre suplementos..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     gestionar_estadisticas("nueva_consulta")
-    st.rerun() # <--- CLAVE: Recargamos para procesar el mensaje desde el historial
+    st.rerun()
 
-# B. PROCESAMIENTO (Lee del historial, NO del input)
+# B. PROCESAMIENTO
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    
-    # Recuperamos el último mensaje del usuario
     last_msg = st.session_state.messages[-1]["content"]
     stop_processing = False
     
     # 1. VERIFICACIÓN DE SEGURIDAD
     for sup, data in SEGURIDAD_SUPLEMENTOS.items():
         if sup in last_msg.lower():
-            
-            # Caso 1: Si ya hay alerta activa por esto, NO contestamos
             if st.session_state.alerta_fijada and st.session_state.alerta_fijada['sup'] == sup:
                 stop_processing = True
                 break
-                
-            # Caso 2: Si ya fue validado ("Estoy sano"), lo ignoramos y seguimos
             if sup in st.session_state.validaciones_ok:
                 continue 
             
-            # Caso 3: Nueva detección -> Preguntamos
             with st.chat_message("assistant", avatar="🛡️"):
                 st.warning(f"**Protocolo de Seguridad: {sup.capitalize()}**")
                 st.write(data["pregunta"])
-                
                 c1, c2 = st.columns(2)
                 if c1.button("No, estoy sano"):
                     st.session_state.validaciones_ok.add(sup)
-                    st.rerun() # Al recargar, entrará en el Caso 2
-                
+                    st.rerun()
                 if c2.button("Sí, tengo esa condición"):
                     st.session_state.alerta_fijada = {
                         "sup": sup,
                         "condicion": data["alerta_si"],
                         "esp": data["especialidad"]
                     }
-                    st.rerun() # Al recargar, entrará en el Caso 1
+                    st.rerun()
+            st.stop() 
             
-            st.stop() # Detenemos todo mientras esperamos el clic
-            
-    # 2. GENERACIÓN DE RESPUESTA (Solo si no hay bloqueos)
+    # 2. GENERACIÓN DE RESPUESTA
     if not stop_processing:
         with st.chat_message("assistant"):
             with st.spinner("🧠 Analizando con Gemini 2.0..."):
@@ -194,12 +243,9 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                     
                     st.markdown(res_text)
                     st.session_state.messages.append({"role": "assistant", "content": res_text})
-                    # Ya no hacemos rerun aquí para que no parpadee
-                    
                 except Exception as e:
                     st.error(f"⚠️ Error IA: {str(e)}")
                     st.session_state.messages.append({"role": "assistant", "content": f"Error: {str(e)}"})
-
 
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
