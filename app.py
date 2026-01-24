@@ -92,10 +92,6 @@ if user_input:
         respuesta = f"Analizando {user_input}..." 
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         st.rerun()
-            st.rerun()
-    
-    # Forzar actualización del contador en la sidebar
-    st.rerun()
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
     #try:
