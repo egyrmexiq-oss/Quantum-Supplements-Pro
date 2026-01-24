@@ -77,7 +77,7 @@ try:
         
         # ⚠️ AQUÍ PUEDES CAMBIAR EL NOMBRE DEL MODELO SI PREFIERES OTRO
         # Opciones: 'gemini-1.5-flash', 'gemini-2.0-flash-exp'
-        model = genai.GenerativeModel('gemini-1.5-flash') 
+        model = genai.GenerativeModel('gemini-2.5-flash')
     else:
         st.error("⚠️ Error: No encuentro 'GEMINI_API_KEY' en secrets.toml")
         st.stop()
@@ -247,7 +247,7 @@ if user_input:
     st.rerun()
 
 
-    
+
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
     #try:
