@@ -1,20 +1,27 @@
 import streamlit as st
-import google.generativeai as genai
+import datetime
 from rules import SEGURIDAD_SUPLEMENTOS 
 
-# 1. CONFIGURACIÓN INICIAL
+# ==========================================
+# 1. CONFIGURACIÓN DE PÁGINA
+# ==========================================
 st.set_page_config(page_title="Quantum Access Supplements", page_icon="💊", layout="wide")
 
-# 2. INICIALIZACIÓN DE ESTADOS (MEMORIA)
+# ==========================================
+# 2. GESTIÓN DE ESTADO (MEMORIA)
+# ==========================================
 if "usuario_activo" not in st.session_state: st.session_state.usuario_activo = None
 if "messages" not in st.session_state: st.session_state.messages = [] 
-if "alerta_activa" not in st.session_state: st.session_state.alerta_activa = None
+if "alerta_fijada" not in st.session_state: st.session_state.alerta_fijada = None
 
-# 3. LOGIN
+# ==========================================
+# 3. LOGIN DE SEGURIDAD
+# ==========================================
 if not st.session_state.usuario_activo:
     st.markdown("## 🔐 Quantum Supplements")
     try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=400)
     except: pass
+    
     c = st.text_input("Clave de Acceso:", type="password")
     if st.button("Entrar"):
         if c.strip().upper() == "DEMO":
@@ -22,74 +29,99 @@ if not st.session_state.usuario_activo:
             st.rerun()
     st.stop()
 
-# 4. BARRA LATERAL (SIDEBAR LIMPIA)
+# ==========================================
+# 4. BARRA LATERAL (ADMIN Y RECURSOS)
+# ==========================================
 with st.sidebar:
     st.success(f"👤 {st.session_state.usuario_activo}")
-    # Solo un contador, usando la métrica oficial de Streamlit
     st.metric("Mensajes en sesión", len(st.session_state.messages))
     
     st.markdown("---")
-    nivel = st.radio("Nivel de Respuesta:", ["Básica", "Media", "Experta"])
+    st.subheader("🛠️ Panel de Control")
+    nivel = st.radio("Nivel de IA:", ["Básica", "Media", "Experta"])
+    
+    # --- AQUÍ ESTÁN TUS ENLACES RECUPERADOS ---
+    with st.expander("📂 Recursos Administrativos"):
+        st.caption("Accesos directos:")
+        # Reemplaza estas URL con las tuyas reales de Google
+        st.link_button("📝 Formulario de Alta", "https://forms.google.com/tu-formulario")
+        st.link_button("📊 Ver Hoja de Cálculo", "https://docs.google.com/spreadsheets/d/tu-hoja")
+    
+    st.markdown("---")
     if st.button("🗑️ Limpiar Historial"):
         st.session_state.messages = []
-        st.session_state.alerta_activa = None
-        st.rerun()
-    if st.button("🔒 Salir"):
-        st.session_state.clear()
+        st.session_state.alerta_fijada = None
         st.rerun()
 
-# 5. CUERPO PRINCIPAL Y PORTADA
+# ==========================================
+# 5. ZONA PRINCIPAL Y ALERTA DE ESPECIALISTA
+# ==========================================
 st.title("💊 Quantum Supplements")
 
-# Si hay una alerta de riesgo guardada, la mostramos siempre arriba
-if st.session_state.alerta_activa:
-    data = st.session_state.alerta_activa
-    st.error(f"🚨 **RIESGO DETECTADO:** {data['sup'].upper()}")
-    st.markdown(f"Debido a: *{data['condicion']}*, es necesaria una validación profesional.")
-    st.link_button(f"🔎 Contactar Especialista en {data['esp']}", "https://quantum-health.streamlit.app")
-    st.markdown("---")
+# --- AQUÍ ESTÁ LA LÓGICA DE LA VENTANA DEL ESPECIALISTA ---
+if st.session_state.alerta_fijada:
+    val = st.session_state.alerta_fijada
+    # Diseño de la alerta roja
+    st.markdown(f"""
+    <div style="border: 2px solid #FF4B4B; border-radius: 10px; padding: 20px; background-color: rgba(255, 75, 75, 0.1); margin-bottom: 20px;">
+        <h3 style="color: #FF4B4B; margin: 0;">🚨 RIESGO BIO-SISTÉMICO DETECTADO</h3>
+        <p style="color: white; font-size: 1.1em;">Conflicto: <b>{val['sup'].upper()}</b> + <b>{val['condicion']}</b></p>
+        <p style="color: white;">Se requiere validación médica antes de proceder.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # ESTE ES EL BOTÓN QUE BUSCABAS (La "Ventana" de enlace)
+    col_a, col_b = st.columns([1, 3])
+    with col_a:
+        st.link_button(f"🩺 Ir a {val['esp']}", "https://quantum-health.streamlit.app", type="primary")
 
-# Portada solo si no hay charla
-if not st.session_state.messages:
-    try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=300)
+# Portada (Solo si no hay mensajes y no hay alerta)
+if not st.session_state.messages and not st.session_state.alerta_fijada:
+    try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=350)
     except: pass
-    st.info("Escribe el nombre de un suplemento (ej: Magnesio) para iniciar el protocolo.")
 
-# Render historial
+# Renderizar Chat
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 6. LÓGICA DE INTERACCIÓN
-user_input = st.chat_input("Escribe tu consulta...")
+# ==========================================
+# 6. MOTOR DE INTELIGENCIA Y SEGURIDAD
+# ==========================================
+user_input = st.chat_input("Consulta sobre suplementos (ej: Zinc, Magnesio)...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # Revisar seguridad
-    for sup_key, data in SEGURIDAD_SUPLEMENTOS.items():
-        if sup_key in user_input.lower():
+    # 6.1 Revisión de Reglas de Seguridad (rules.py)
+    encontrado = False
+    for sup, data in SEGURIDAD_SUPLEMENTOS.items():
+        if sup in user_input.lower():
+            encontrado = True
             with st.chat_message("assistant", avatar="🧬"):
-                st.warning(f"🛡️ **Protocolo Quantum: {sup_key.capitalize()}**")
+                st.warning(f"🛡️ **Protocolo de Seguridad: {sup.capitalize()}**")
                 st.write(data["pregunta"])
                 
-                # Usamos columnas para los botones de respuesta rápida
-                col_no, col_si = st.columns(2)
-                if col_no.button("No tengo riesgos"):
-                    st.session_state.messages.append({"role": "assistant", "content": f"✅ Validación superada para {sup_key}."})
+                # Botones de Acción
+                c1, c2 = st.columns(2)
+                if c1.button("No, estoy sano"):
+                    st.session_state.messages.append({"role": "assistant", "content": f"✅ Validación OK para {sup}. Generando dosis..."})
                     st.rerun()
-                if col_si.button("Sí, tengo esa condición"):
-                    # GUARDAMOS LA ALERTA EN LA MEMORIA DE SESIÓN
-                    st.session_state.alerta_activa = {
-                        "sup": sup_key,
-                        "condicion": data['alerta_si'],
-                        "esp": data['especialidad']
+                
+                if c2.button("Sí, tengo esa condición"):
+                    # Activar la Alerta Persistente
+                    st.session_state.alerta_fijada = {
+                        "sup": sup,
+                        "condicion": data["alerta_si"],
+                        "esp": data["especialidad"]
                     }
                     st.rerun()
             break
-    else:
-        # Respuesta normal de IA si no hay keyword de seguridad
-        respuesta = f"Analizando {user_input}..." 
+            
+    # 6.2 Respuesta IA (Si no hay reglas activas)
+    if not encontrado:
+        # Aquí iría tu conexión real a Gemini
+        respuesta = f"Analizando '{user_input}' con IA (Nivel {nivel})..."
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         st.rerun()
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
