@@ -1,32 +1,107 @@
 import streamlit as st
 import google.generativeai as genai
-from rules import SEGURIDAD_SUPLEMENTOS 
+import json
+import os
+from rules import SEGURIDAD_SUPLEMENTOS
 
 # ==========================================
-# 1. CONFIGURACIÓN Y CONEXIÓN NEURONAL (CORREGIDO)
+# 1. CONFIGURACIÓN Y ESTILO VISUAL (CSS)
 # ==========================================
 st.set_page_config(page_title="Quantum Access Supplements", page_icon="💊", layout="wide")
 
-# Intentamos conectar con la clave exacta que tienes en secrets.toml
+def inyectar_estilo_quantum():
+    st.markdown("""
+        <style>
+        /* Ocultar elementos nativos de Streamlit */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        
+        /* Ajuste fino de la barra lateral */
+        [data-testid="stSidebar"] {
+            background-color: #0E1117;
+            border-right: 1px solid #262730;
+        }
+        
+        /* Estilo elegante para Métricas (Contadores) */
+        div[data-testid="stMetricValue"] {
+            font-size: 24px !important;
+            color: #00FF94 !important; /* Verde Neón */
+            font-weight: 700;
+        }
+        div[data-testid="stMetricLabel"] {
+            font-size: 14px !important;
+            color: #a0a0a0 !important;
+        }
+        
+        /* Botones Especiales */
+        button[kind="primary"] {
+            background-color: #FF4B4B !important;
+            border: none;
+            transition: all 0.3s;
+        }
+        button[kind="primary"]:hover {
+            box-shadow: 0 0 10px rgba(255, 75, 75, 0.5);
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+inyectar_estilo_quantum() # Activamos el maquillaje
+
+# ==========================================
+# 2. SISTEMA DE PERSISTENCIA (LA MEMORIA)
+# ==========================================
+FILE_STATS = "quantum_stats.json"
+
+def gestionar_estadisticas(tipo="leer"):
+    # Si el archivo no existe, lo creamos en cero
+    if not os.path.exists(FILE_STATS):
+        with open(FILE_STATS, "w") as f:
+            json.dump({"sesiones_totales": 0, "consultas_totales": 0}, f)
+    
+    with open(FILE_STATS, "r") as f:
+        data = json.load(f)
+
+    if tipo == "nueva_sesion":
+        data["sesiones_totales"] += 1
+    elif tipo == "nueva_consulta":
+        data["consultas_totales"] += 1
+    
+    # Guardamos cambios si hubo escritura
+    if tipo != "leer":
+        with open(FILE_STATS, "w") as f:
+            json.dump(data, f)
+    
+    return data
+
+# ==========================================
+# 3. CONEXIÓN NEURONAL (API KEY)
+# ==========================================
 try:
+    # Buscamos la clave correcta GEMINI_API_KEY
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-pro')
     else:
-        st.error("⚠️ Error Crítico: No encuentro 'GEMINI_API_KEY' en secrets.toml. Revisa el nombre.")
-        st.stop() # Detenemos la app si no hay clave
+        st.error("⚠️ Error: No encuentro 'GEMINI_API_KEY' en secrets.toml")
+        st.stop()
 except Exception as e:
     st.error(f"Error de conexión: {e}")
 
 # ==========================================
-# 2. GESTIÓN DE ESTADO (MEMORIA)
+# 4. GESTIÓN DE SESIÓN
 # ==========================================
 if "usuario_activo" not in st.session_state: st.session_state.usuario_activo = None
 if "messages" not in st.session_state: st.session_state.messages = [] 
 if "alerta_fijada" not in st.session_state: st.session_state.alerta_fijada = None
 
+# Detectar inicio de sesión única (para contar +1 vez al entrar)
+if "sesion_iniciada" not in st.session_state:
+    gestionar_estadisticas("nueva_sesion")
+    st.session_state.sesion_iniciada = True
+
 # ==========================================
-# 3. LOGIN DE SEGURIDAD
+# 5. LOGIN
 # ==========================================
 if not st.session_state.usuario_activo:
     st.markdown("## 🔐 Quantum Supplements")
@@ -35,7 +110,6 @@ if not st.session_state.usuario_activo:
     
     c = st.text_input("Clave de Acceso:", type="password")
     if st.button("Entrar"):
-        # Verificamos si la clave es DEMO o alguna de las configuradas
         claves = st.secrets.get("access_keys", {})
         if c.strip().upper() == "DEMO":
             st.session_state.usuario_activo = "Visitante Temporal"
@@ -46,11 +120,17 @@ if not st.session_state.usuario_activo:
     st.stop()
 
 # ==========================================
-# 4. BARRA LATERAL (ADMIN Y RECURSOS)
+# 6. BARRA LATERAL (CON DATOS HISTÓRICOS)
 # ==========================================
+stats_actuales = gestionar_estadisticas("leer") # Leemos los datos
+
 with st.sidebar:
     st.success(f"👤 {st.session_state.usuario_activo}")
-    st.metric("Mensajes en sesión", len(st.session_state.messages))
+    
+    # Métrica Doble
+    col_m1, col_m2 = st.columns(2)
+    col_m1.metric("Sesiones", stats_actuales["sesiones_totales"])
+    col_m2.metric("Consultas", stats_actuales["consultas_totales"])
     
     st.markdown("---")
     st.subheader("🛠️ Panel de Control")
@@ -58,21 +138,22 @@ with st.sidebar:
     
     with st.expander("📂 Recursos Administrativos"):
         st.caption("Accesos directos:")
-        st.link_button("📝 Formulario de Alta", "https://forms.google.com/tu-formulario-real") # <--- Pega tu link aquí
-        st.link_button("📊 Ver Hoja de Cálculo", "https://docs.google.com/spreadsheets/d/tu-hoja-real") # <--- Pega tu link aquí
+        # Pega TUS LINKS REALES aquí abajo
+        st.link_button("📝 Formulario de Alta", "https://forms.google.com/tu-link-real") 
+        st.link_button("📊 Ver Hoja de Cálculo", "https://docs.google.com/spreadsheets/d/tu-link-real")
     
     st.markdown("---")
-    if st.button("🗑️ Limpiar Historial"):
+    if st.button("🗑️ Limpiar Chat"):
         st.session_state.messages = []
         st.session_state.alerta_fijada = None
         st.rerun()
 
 # ==========================================
-# 5. ZONA PRINCIPAL Y ALERTA DE ESPECIALISTA
+# 7. ZONA PRINCIPAL
 # ==========================================
 st.title("💊 Quantum Supplements")
 
-# LÓGICA DE LA VENTANA ROJA (PERSISTENTE)
+# ALERTA PERSISTENTE
 if st.session_state.alerta_fijada:
     val = st.session_state.alerta_fijada
     st.markdown(f"""
@@ -85,31 +166,32 @@ if st.session_state.alerta_fijada:
     
     col_a, col_b = st.columns([1, 3])
     with col_a:
-        # AQUÍ ESTÁ EL BOTÓN DE ESPECIALISTAS
         st.link_button(f"🩺 Ir a {val['esp']}", "https://quantum-health.streamlit.app", type="primary")
 
-# Portada (Solo si no hay mensajes y no hay alerta)
+# PORTADA (Solo si está vacío y limpio)
 if not st.session_state.messages and not st.session_state.alerta_fijada:
     try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=350)
     except: pass
 
-# Renderizar Chat
+# HISTORIAL DE CHAT
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # ==========================================
-# 6. MOTOR DE INTELIGENCIA Y SEGURIDAD
+# 8. MOTOR DE INTELIGENCIA Y SEGURIDAD
 # ==========================================
 user_input = st.chat_input("Consulta sobre suplementos (ej: Zinc, Magnesio)...")
 
 if user_input:
-    # 1. Guardar mensaje del usuario
+    # Guardamos mensaje y SUMAMOS +1 AL CONTADOR GLOBAL
     st.session_state.messages.append({"role": "user", "content": user_input})
+    gestionar_estadisticas("nueva_consulta") # <--- Aquí actualizamos el histórico
+    
     with st.chat_message("user"):
         st.markdown(user_input)
     
-    # 2. Revisión de Reglas de Seguridad (rules.py)
+    # REGLAS DE SEGURIDAD
     encontrado = False
     for sup, data in SEGURIDAD_SUPLEMENTOS.items():
         if sup in user_input.lower():
@@ -133,26 +215,18 @@ if user_input:
                     st.rerun()
             break
             
-    # 3. Respuesta IA REAL (Google Gemini)
+    # RESPUESTA IA (Gemini)
     if not encontrado:
         with st.chat_message("assistant"):
             with st.spinner("🧠 Procesando bio-algoritmos..."):
                 try:
-                    # Prompt de Ingeniería para Gemini
                     prompt_sistema = f"""
                     Actúa como un Consultor Experto en Salud de Quantum Supplements.
-                    El usuario tiene un nivel de conocimiento: {nivel}.
-                    Responde a la consulta: "{user_input}".
-                    
-                    Estructura tu respuesta así:
-                    1. 🧬 **Beneficio Principal**
-                    2. 💊 **Dosis Sugerida** (General)
-                    3. ⚠️ **Precaución Breve**
-                    
-                    Mantén un tono profesional, empático y futurista.
+                    Nivel de detalle: {nivel}.
+                    Responde a: "{user_input}".
+                    Usa formato estructurado con emojis (🧬, 💊, ⚠️).
                     """
                     
-                    # LLAMADA REAL A LA API
                     response = model.generate_content(prompt_sistema)
                     texto_respuesta = response.text
                     
@@ -160,6 +234,9 @@ if user_input:
                     st.session_state.messages.append({"role": "assistant", "content": texto_respuesta})
                 except Exception as e:
                     st.error(f"Error en el núcleo de IA: {e}")
+
+    # Refrescamos para ver el contador nuevo
+    st.rerun()
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
     #try:
