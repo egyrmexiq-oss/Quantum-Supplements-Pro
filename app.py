@@ -216,6 +216,13 @@ if user_input:
             break
             
     # RESPUESTA IA (Gemini)
+   # ... (El resto del código de arriba NO lo toques) ...
+
+    # ==========================================
+    # 8. MOTOR DE INTELIGENCIA Y SEGURIDAD (VERSIÓN DIAGNÓSTICO)
+    # ==========================================
+    
+    # RESPUESTA IA (Gemini)
     if not encontrado:
         with st.chat_message("assistant"):
             with st.spinner("🧠 Procesando bio-algoritmos..."):
@@ -227,15 +234,23 @@ if user_input:
                     Usa formato estructurado con emojis (🧬, 💊, ⚠️).
                     """
                     
+                    # Llamada a la API
                     response = model.generate_content(prompt_sistema)
                     texto_respuesta = response.text
                     
+                    # ÉXITO: Mostramos y guardamos
                     st.markdown(texto_respuesta)
                     st.session_state.messages.append({"role": "assistant", "content": texto_respuesta})
+                
                 except Exception as e:
-                    st.error(f"Error en el núcleo de IA: {e}")
+                    # FALLO: Capturamos el error para que NO desaparezca
+                    error_msg = f"⚠️ **Error Detectado:** {str(e)}"
+                    st.error(error_msg)
+                    
+                    # ¡ESTO ES LO IMPORTANTE! Guardamos el error en el historial
+                    st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
-    # Refrescamos para ver el contador nuevo
+    # Recargamos para ver el resultado
     st.rerun()
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
