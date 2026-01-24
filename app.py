@@ -111,7 +111,7 @@ stats = gestionar_estadisticas("leer")
 
 with st.sidebar:
     # 1. LOGO DE LA MARCA (Archivo Local)
-    # IMPORTANTE: Asegúrate de subir tu archivo 'logo_quantum.png' a la carpeta
+    # IMPORTANTE: Asegúrate de subir tu archivo 'Logo_quantum.png' a la carpeta
     try:
         st.image("logo_quantum.png", width=120) 
     except:
