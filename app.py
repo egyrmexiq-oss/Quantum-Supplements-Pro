@@ -121,7 +121,7 @@ with st.sidebar:
         st.link_button("📝 Alta", "https://forms.google.com/...") 
         st.link_button("📊 Datos", "https://docs.google.com/spreadsheets/...")
     
-    if st.button("🗑️ Reiniciar"):
+    if st.button("🗑️ Borrar"):
         st.session_state.messages = []
         st.session_state.alerta_fijada = None
         st.session_state.validaciones_ok = set()
