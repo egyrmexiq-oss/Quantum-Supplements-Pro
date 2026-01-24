@@ -110,14 +110,21 @@ if not st.session_state.usuario_activo:
 stats = gestionar_estadisticas("leer")
 
 with st.sidebar:
-    # 1. LOGO DE LA MARCA (Archivo Local)
-    # IMPORTANTE: Asegúrate de subir tu archivo 'Logo_quantum.png' a la carpeta
+    # 1. LOGO (Centrado usando columnas invisibles)
     try:
-        st.image("Logo_quantum.png", width=120) 
+        # Creamos 3 columnas: margen, centro ancho, margen
+        # [1, 4, 1] hace que el centro sea 4 veces más ancho que los lados
+        c_izq, c_centro, c_der = st.columns([1, 4, 1])
+        with c_centro:
+            # use_container_width=True hace que la imagen llene el espacio central
+            st.image("logo_quantum.png", use_container_width=True) 
     except:
-        st.header("🧬 Quantum")
+        # Si falla la imagen, mostramos texto centrado
+        st.markdown("<h2 style='text-align: center;'>🧬 Quantum</h2>", unsafe_allow_html=True)
 
-    st.markdown("---")
+    # Espaciador
+    st.markdown("<br>", unsafe_allow_html=True)
+
     
     # 2. CAJA DE USUARIO (Estilo HTML Verde Compacto)
     st.markdown(f"""
