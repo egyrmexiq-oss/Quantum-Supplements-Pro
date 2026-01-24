@@ -2,91 +2,96 @@ import streamlit as st
 import google.generativeai as genai
 from rules import SEGURIDAD_SUPLEMENTOS 
 
-# ==========================================
-# ⚙️ CONFIGURACIÓN DE PÁGINA
-# ==========================================
+# ⚙️ CONFIGURACIÓN
 st.set_page_config(page_title="Quantum Access Supplements", page_icon="💊", layout="wide")
 
-# ==========================================
-# 🎨 FUNCIÓN: ALERTA CUÁNTICA CON BOTÓN A ESPECIALISTAS
-# ==========================================
+# 🎨 VENTANILLA DE ESPECIALISTAS
 def mostrar_alerta_riesgo(suplemento, condicion, especialidad):
-    st.markdown(f"""
-    <div style="border: 2px solid #FF4B4B; border-radius: 10px; padding: 20px; background-color: rgba(255, 75, 75, 0.1); margin: 20px 0;">
-        <h3 style="color: #FF4B4B; margin-top: 0;">🚨 NOTIFICACIÓN DE RIESGO BIO-SISTÉMICO</h3>
-        <p style="color: white;">Contraindicación crítica: <b>{suplemento.upper()}</b> + <b>{condicion}</b>.</p>
-        <p style="color: white;"><b>PASO SUGERIDO:</b> Derivación inmediata a <b>{especialidad}</b>.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    # Aquí está la "ventanilla" o botón al portal de salud
-    st.link_button(f"🔎 Ver Especialistas en {especialidad}", "https://quantum-health.streamlit.app")
+    with st.chat_message("assistant", avatar="🚨"):
+        st.markdown(f"""
+        <div style="border: 2px solid #FF4B4B; border-radius: 10px; padding: 20px; background-color: rgba(255, 75, 75, 0.1); margin: 10px 0;">
+            <h3 style="color: #FF4B4B; margin-top: 0;">🚨 RIESGO BIO-SISTÉMICO DETECTADO</h3>
+            <p style="color: white;">Contraindicación: <b>{suplemento.upper()}</b> + <b>{condicion}</b>.</p>
+            <hr style="border: 0.5px solid #FF4B4B;">
+            <p style="color: white;"><b>ACCIÓN:</b> Consulta obligatoria con <b>{especialidad}</b>.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        # Aquí la ventanilla física
+        st.link_button(f"🔎 Contactar Especialista en {especialidad}", "https://quantum-health.streamlit.app")
 
-# ==========================================
-# 🔐 LOGIN Y ESTADO DE MEMORIA (EL CONTADOR)
-# ==========================================
+# 🔐 LOGIN
 if "usuario_activo" not in st.session_state: st.session_state.usuario_activo = None
-if "messages" not in st.session_state: st.session_state.messages = [] # Esto activa el "contador" de mensajes
+if "messages" not in st.session_state: st.session_state.messages = [] 
 
 if not st.session_state.usuario_activo:
-    # ... (Mantener tu bloque de login igual)
     st.markdown("## 🔐 Quantum Supplements")
     c = st.text_input("Clave de Acceso:", type="password")
     if st.button("Entrar"):
-        if c.strip() == "DEMO":
-            st.session_state.usuario_activo = "Cliente Admin"
+        if c.strip().upper() == "DEMO":
+            st.session_state.usuario_activo = "Visitante Temporal" # Cambiado de Admin a Visitante
             st.rerun()
     st.stop()
 
-# ==========================================
-# 📊 BARRA LATERAL (SIDEBAR)
-# ==========================================
+# 📊 SIDEBAR (CONTADOR REAL)
 with st.sidebar:
-    st.image("https://raw.githubusercontent.com/tu-usuario/tu-repo/main/logo_quantum.png") # Tu logo Q
+    st.image("https://raw.githubusercontent.com/tu-usuario/tu-repo/main/logo_quantum.png") # Tu logo
     st.success(f"👤 {st.session_state.usuario_activo}")
-    st.markdown(f"**Mensajes en sesión:** {len(st.session_state.messages)}") # El contador real
+    
+    # El contador ahora es reactivo a la lista de mensajes
+    st.metric("Mensajes en sesión", len(st.session_state.messages))
+    
     st.markdown("---")
     nivel = st.radio("Nivel de Respuesta:", ["Básica", "Media", "Experta"])
     if st.button("🗑️ Limpiar Historial"):
         st.session_state.messages = []
         st.rerun()
 
-# ==========================================
-# 💊 LÓGICA DEL CHAT Y SEGURIDAD
-# ==========================================
+# 💊 CHAT Y LÓGICA DE SEGURIDAD
 st.title("💊 Quantum Supplements")
 
-# Mostrar mensajes previos (El historial)
+# Renderizar historial
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-user_input = st.chat_input("Escribe tu consulta...")
+user_input = st.chat_input("Escribe tu consulta (ej: Magnesio)...")
 
 if user_input:
-    # Agregar mensaje del usuario al historial
+    # 1. Registro inmediato en el contador
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # 🛡️ VERIFICAR SEGURIDAD (rules.py)
+    # 2. Análisis de Seguridad
     trigger_safety = False
     for sup_key, data in SEGURIDAD_SUPLEMENTOS.items():
         if sup_key in user_input.lower():
             trigger_safety = True
-            with st.chat_message("assistant"):
-                st.warning(f"🛡️ **Protocolo de Validación: {sup_key.capitalize()}**")
+            with st.chat_message("assistant", avatar="🧬"):
+                st.info(f"🛡️ **Protocolo Quantum: {sup_key.capitalize()}**")
                 st.write(data["pregunta"])
-                res = st.radio("¿Confirmas alguna condición?", ["No", "Sí"], key=f"sec_{sup_key}")
-                if res == "Sí":
-                    mostrar_alerta_riesgo(sup_key, data['alerta_si'], data['especialidad'])
+                
+                # Usamos un formulario para que la respuesta cuente y dispare la alerta
+                with st.form(key=f"form_{sup_key}"):
+                    opcion = st.radio("¿Padeces alguna de estas condiciones?", ["No", "Sí"])
+                    enviar = st.form_submit_button("Validar Suplemento")
+                    
+                    if enviar:
+                        if opcion == "Sí":
+                            mostrar_alerta_riesgo(sup_key, data['alerta_si'], data['especialidad'])
+                        else:
+                            st.success("✅ Validación superada. Analizando dosis óptima...")
             break
 
-    # 🤖 RESPUESTA DE IA (Si no hay alerta bloqueante)
     if not trigger_safety:
         with st.chat_message("assistant"):
-            respuesta_ia = f"Analizando {user_input} bajo nivel {nivel}..." # Aquí conectas tu genai
-            st.markdown(respuesta_ia)
-            st.session_state.messages.append({"role": "assistant", "content": respuesta_ia})
+            # Aquí va el motor de Gemini
+            respuesta = f"Procesando info de {user_input} en nivel {nivel}..."
+            st.markdown(respuesta)
+            st.session_state.messages.append({"role": "assistant", "content": respuesta})
+    
+    # Forzar actualización del contador en la sidebar
+    st.rerun()
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
     #try:
