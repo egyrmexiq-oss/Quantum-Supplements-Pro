@@ -113,7 +113,7 @@ with st.sidebar:
     # 1. LOGO DE LA MARCA (Archivo Local)
     # IMPORTANTE: Asegúrate de subir tu archivo 'Logo_quantum.png' a la carpeta
     try:
-        st.image("logo_quantum.png", width=120) 
+        st.image("Logo_quantum.png", width=120) 
     except:
         st.header("🧬 Quantum")
 
