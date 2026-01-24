@@ -6,6 +6,11 @@ import streamlit.components.v1 as components
 # ==========================================
 # ⚙️ CONFIGURACIÓN DE PÁGINA
 # ==========================================
+st.set_page_config(
+    page_title="Quantum Access Supplements", 
+    page_icon="💊", 
+    layout="wide"  # <--- AGREGA ESTA LÍNEA AQUÍ
+)
 # ==========================================
 # 🔐 1. LOGIN DE SEGURIDAD
 # ==========================================
