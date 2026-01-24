@@ -149,9 +149,7 @@ if not st.session_state.messages and not st.session_state.alerta_fijada:
     except: pass
 
 # Historial
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+
 
 # ==========================================
 # 8. CEREBRO CUÁNTICO (LÓGICA CORREGIDA)
