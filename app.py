@@ -5,103 +5,88 @@ from rules import SEGURIDAD_SUPLEMENTOS
 # ==========================================
 # ⚙️ CONFIGURACIÓN DE PÁGINA
 # ==========================================
-st.set_page_config(
-    page_title="Quantum Access Supplements", 
-    page_icon="💊", 
-    layout="wide"
-)
+st.set_page_config(page_title="Quantum Access Supplements", page_icon="💊", layout="wide")
 
 # ==========================================
-# 🎨 FUNCIÓN: ALERTA CUÁNTICA (OPCIÓN C)
+# 🎨 FUNCIÓN: ALERTA CUÁNTICA CON BOTÓN A ESPECIALISTAS
 # ==========================================
 def mostrar_alerta_riesgo(suplemento, condicion, especialidad):
     st.markdown(f"""
     <div style="border: 2px solid #FF4B4B; border-radius: 10px; padding: 20px; background-color: rgba(255, 75, 75, 0.1); margin: 20px 0;">
-        <h3 style="color: #FF4B4B; margin-top: 0; font-family: sans-serif;">🚨 NOTIFICACIÓN DE RIESGO BIO-SISTÉMICO</h3>
-        <p style="font-size: 1.1em; color: white;">Se ha detectado una contraindicación crítica entre <b>{suplemento.upper()}</b> y <b>{condicion}</b>.</p>
-        <hr style="border: 0.5px solid #FF4B4B;">
-        <p style="color: white;"><b>ESTADO:</b> Suplementación NO recomendada de forma autónoma.</p>
+        <h3 style="color: #FF4B4B; margin-top: 0;">🚨 NOTIFICACIÓN DE RIESGO BIO-SISTÉMICO</h3>
+        <p style="color: white;">Contraindicación crítica: <b>{suplemento.upper()}</b> + <b>{condicion}</b>.</p>
         <p style="color: white;"><b>PASO SUGERIDO:</b> Derivación inmediata a <b>{especialidad}</b>.</p>
     </div>
     """, unsafe_allow_html=True)
+    # Aquí está la "ventanilla" o botón al portal de salud
+    st.link_button(f"🔎 Ver Especialistas en {especialidad}", "https://quantum-health.streamlit.app")
 
 # ==========================================
-# 🔐 LOGIN DE SEGURIDAD
+# 🔐 LOGIN Y ESTADO DE MEMORIA (EL CONTADOR)
 # ==========================================
-if "usuario_activo" not in st.session_state: 
-    st.session_state.usuario_activo = None
+if "usuario_activo" not in st.session_state: st.session_state.usuario_activo = None
+if "messages" not in st.session_state: st.session_state.messages = [] # Esto activa el "contador" de mensajes
 
 if not st.session_state.usuario_activo:
+    # ... (Mantener tu bloque de login igual)
     st.markdown("## 🔐 Quantum Supplements")
-    try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=400)
-    except: pass
-    
-    st.info("🔑 Para ingresar, usa la clave: **DEMO**")
     c = st.text_input("Clave de Acceso:", type="password")
     if st.button("Entrar"):
-        claves_validas = st.secrets.get("access_keys", {})
-        if c.strip() == "DEMO" or (c.strip() in claves_validas):
-            nombre = "Cliente Admin" if c.strip() == "DEMO" else claves_validas[c.strip()]
-            st.session_state.usuario_activo = nombre
+        if c.strip() == "DEMO":
+            st.session_state.usuario_activo = "Cliente Admin"
             st.rerun()
-        else: st.error("Acceso Denegado")
     st.stop()
 
 # ==========================================
-# 📊 BARRA LATERAL (SIDEBAR) - RECUPERADA
+# 📊 BARRA LATERAL (SIDEBAR)
 # ==========================================
 with st.sidebar:
-    # Imagen del logo (puedes poner la URL de tu imagen azul de ADN aquí)
-    st.image("https://raw.githubusercontent.com/tu-usuario/tu-repo/main/logo_quantum.png", use_container_width=True) # Ajusta la URL si la tienes local
-    
-    st.success(f"Hola, {st.session_state.usuario_activo}")
-    
+    st.image("https://raw.githubusercontent.com/tu-usuario/tu-repo/main/logo_quantum.png") # Tu logo Q
+    st.success(f"👤 {st.session_state.usuario_activo}")
+    st.markdown(f"**Mensajes en sesión:** {len(st.session_state.messages)}") # El contador real
     st.markdown("---")
-    st.subheader("⚙️ Configuración")
-    nivel = st.radio(
-        "Nivel de Respuesta:",
-        ["Básica", "Media", "Experta"],
-        index=0
-    )
-    
-    if st.button("🗑️ Limpiar Chat"):
+    nivel = st.radio("Nivel de Respuesta:", ["Básica", "Media", "Experta"])
+    if st.button("🗑️ Limpiar Historial"):
         st.session_state.messages = []
         st.rerun()
-        
-    if st.button("🔒 Salir"):
-        st.session_state.usuario_activo = None
-        st.rerun()
 
 # ==========================================
-# 💊 INTERFAZ PRINCIPAL
+# 💊 LÓGICA DEL CHAT Y SEGURIDAD
 # ==========================================
 st.title("💊 Quantum Supplements")
-st.caption(f"Asistente Médico Inteligente - Nivel {nivel}")
 
-user_input = st.chat_input("Escribe tus síntomas o dudas aquí...")
+# Mostrar mensajes previos (El historial)
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+user_input = st.chat_input("Escribe tu consulta...")
 
 if user_input:
-    # Lógica de seguridad con rules.py
+    # Agregar mensaje del usuario al historial
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    # 🛡️ VERIFICAR SEGURIDAD (rules.py)
     trigger_safety = False
     for sup_key, data in SEGURIDAD_SUPLEMENTOS.items():
         if sup_key in user_input.lower():
             trigger_safety = True
-            st.warning(f"🛡️ **Protocolo de Validación para {sup_key.capitalize()}:**")
-            st.markdown(f"**{data['pregunta']}**")
-            
-            col1, col2 = st.columns([1, 4])
-            with col1:
-                res = st.radio("Respuesta:", ["No", "Sí"], key=f"check_{sup_key}")
-            
-            if res == "Sí":
-                mostrar_alerta_riesgo(sup_key, data['alerta_si'], data['especialidad'])
-            else:
-                st.success("✅ Validación superada. Generando respuesta técnica...")
-                # Aquí llamarías a Gemini
+            with st.chat_message("assistant"):
+                st.warning(f"🛡️ **Protocolo de Validación: {sup_key.capitalize()}**")
+                st.write(data["pregunta"])
+                res = st.radio("¿Confirmas alguna condición?", ["No", "Sí"], key=f"sec_{sup_key}")
+                if res == "Sí":
+                    mostrar_alerta_riesgo(sup_key, data['alerta_si'], data['especialidad'])
             break
-            
+
+    # 🤖 RESPUESTA DE IA (Si no hay alerta bloqueante)
     if not trigger_safety:
-        st.chat_message("assistant").write("Analizando consulta bajo los parámetros Quantum...")
+        with st.chat_message("assistant"):
+            respuesta_ia = f"Analizando {user_input} bajo nivel {nivel}..." # Aquí conectas tu genai
+            st.markdown(respuesta_ia)
+            st.session_state.messages.append({"role": "assistant", "content": respuesta_ia})
         # --- CÓDIGO TEMPORAL DE DIAGNÓSTICO ---
 #if st.button("🕵️ Ver Modelos Disponibles"):
     #try:
