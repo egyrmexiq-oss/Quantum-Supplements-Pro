@@ -11,7 +11,7 @@ st.set_page_config(page_title="Quantum Access Supplements", page_icon="💊", la
 try:
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash')
     else:
         st.error("⚠️ Error Crítico: No encuentro 'GEMINI_API_KEY' en secrets.toml. Revisa el nombre.")
         st.stop() # Detenemos la app si no hay clave
