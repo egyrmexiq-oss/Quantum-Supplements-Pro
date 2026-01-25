@@ -3,8 +3,7 @@ import google.generativeai as genai
 import json
 import os
 from rules import SEGURIDAD_SUPLEMENTOS
-    # Música
-st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
+
 
 # ==========================================
 # 1. CONFIGURACIÓN Y ESTILO
@@ -38,6 +37,9 @@ def inyectar_estilo_quantum():
         """, unsafe_allow_html=True)
 
 inyectar_estilo_quantum()
+
+    # Música
+st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
 
 # ==========================================
 # 2. SISTEMA DE ESTADÍSTICAS
