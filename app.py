@@ -38,8 +38,6 @@ def inyectar_estilo_quantum():
 
 inyectar_estilo_quantum()
 
-    # Música
-st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
 
 # ==========================================
 # 2. SISTEMA DE ESTADÍSTICAS
@@ -107,6 +105,10 @@ if not st.session_state.usuario_activo:
             st.session_state.usuario_activo = claves[c]
             st.rerun()
     st.stop()
+
+    # Música
+st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
+
 
 # ==========================================
 # 6. SIDEBAR (NUEVO ESTILO HEALTH + LOGO)
