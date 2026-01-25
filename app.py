@@ -94,7 +94,9 @@ if not st.session_state.usuario_activo:
     st.markdown("## 🔐 Quantum Supplements")
     try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=400)
     except: pass
-    
+    # Música
+    st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
+   
     c = st.text_input("Clave de Acceso:", type="password")
     if st.button("Entrar"):
         claves = st.secrets.get("access_keys", {})
@@ -106,8 +108,8 @@ if not st.session_state.usuario_activo:
             st.rerun()
     st.stop()
 
-    # Música
-st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
+    
+
 
 
 # ==========================================
