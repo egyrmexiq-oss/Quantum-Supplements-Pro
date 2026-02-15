@@ -92,6 +92,7 @@ if "sesion_iniciada" not in st.session_state:
 # ==========================================
 if not st.session_state.usuario_activo:
     st.markdown("## 🔐 Quantum Supplements")
+    st.markdown ("## 🔓 Solicita acceso por SMS o al WhatsAp 333 220 32 61")
     try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=400)
     except: pass
     # Música
