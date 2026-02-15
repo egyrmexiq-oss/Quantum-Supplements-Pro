@@ -68,7 +68,7 @@ def gestionar_estadisticas(tipo="leer"):
 try:
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel('gemini-2.0-flash-exp') 
+        model = genai.GenerativeModel('gemini-2.0-flash') 
     else:
         st.error("⚠️ Error: Falta 'GEMINI_API_KEY' en secrets.toml")
         st.stop()
