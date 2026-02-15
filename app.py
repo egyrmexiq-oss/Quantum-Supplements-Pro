@@ -100,7 +100,7 @@ if not st.session_state.usuario_activo:
     c = st.text_input("Pronto dejará de funcionar la clave DEMO, si te interesa tener acceso Prefencial, envía WhatsApp al 333 220 32 61 con la palabra ENTRAR: Ingresa la Clave de Acceso:", type="password")
     if st.button("Entrar"):
         claves = st.secrets.get("access_keys", {})
-        if c.strip().upper() == "DEMO":
+        if c.strip().upper() == "DEMOno":
             st.session_state.usuario_activo = "Visitante Temporal"
             st.rerun()
         elif c in claves:
