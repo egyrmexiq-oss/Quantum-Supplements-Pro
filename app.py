@@ -98,7 +98,7 @@ if not st.session_state.usuario_activo:
     # Música
     st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
    
-    c = st.text_input("Pronto dejará de funcionar la clave DEMO, si te interesa tener acceso Prefencial, envía WhatsApp al 333 220 32 61 con la palabra ENTRAR: Ingresa la Clave de Acceso:", type="password")
+    c = st.text_input("Ingresa la Clave de Acceso:", type="password")
     if st.button("Entrar"):
         claves = st.secrets.get("access_keys", {})
         if c.strip().upper() == "DEMOno":
