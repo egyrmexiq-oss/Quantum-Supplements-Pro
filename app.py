@@ -244,7 +244,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
     # 2. GENERACIÓN DE RESPUESTA
     if not stop_processing:
         with st.chat_message("assistant"):
-            with st.spinner("🧠 Analizando con Gemini 2.0..."):
+            with st.spinner("🧠 Analizando..."):
                 try:
                     prompt_ia = f"""
                     Actúa como Experto en Suplementos. Nivel: {nivel}.
