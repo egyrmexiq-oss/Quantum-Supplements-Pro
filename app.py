@@ -3,7 +3,9 @@ import google.generativeai as genai
 import json
 import os
 from rules import SEGURIDAD_SUPLEMENTOS
-
+import streamlit as st
+# ... tus otros imports ...
+import utils_login as login  # <--- 1. Importar el nuevo módulo
 
 # ==========================================
 # 1. CONFIGURACIÓN Y ESTILO
@@ -88,26 +90,23 @@ if "sesion_iniciada" not in st.session_state:
     st.session_state.sesion_iniciada = True
 
 # ==========================================
-# 5. LOGIN
+# 🔐 ZONA DE SEGURIDAD (Login Modular)
 # ==========================================
-if not st.session_state.usuario_activo:
-    st.markdown("## 🔐 Quantum Supplements")
-    st.markdown ("🔓 Solicita acceso por SMS o al WhatsAp 333 220 32 61")
-    try: st.components.v1.iframe("https://my.spline.design/claritystream-Vcf5uaN9MQgIR4VGFA5iU6Es/", height=400)
-    except: pass
-    # Música
-    st.audio("https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", loop=True, autoplay=True)
-   
-    c = st.text_input("Ingresa la Clave de Acceso:", type="password")
-    if st.button("Entrar"):
-        claves = st.secrets.get("access_keys", {})
-        if c.strip().upper() == "DEMOno":
-            st.session_state.usuario_activo = "Visitante Temporal"
-            st.rerun()
-        elif c in claves:
-            st.session_state.usuario_activo = claves[c]
-            st.rerun()
+
+# Llamamos a la función. Si no pasa el login, el código se detiene dentro de la función.
+usuario = login.validar_acceso()
+
+# Si la función retorna None (no logueado), detenemos la app principal aquí.
+if not usuario:
     st.stop()
+
+# ==========================================
+# 🚀 AQUI COMIENZA TU APP REAL
+# ==========================================
+# A partir de esta línea, SOLO llega quien pasó el login.
+# Ya no necesitas "if not st.session_state.usuario_activo:" ni indentar todo.
+
+st.markdown(f"Hola **{usuario}**, bienvenido al sistema.")
 
     
 
