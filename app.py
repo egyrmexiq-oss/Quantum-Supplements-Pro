@@ -39,7 +39,24 @@ def inyectar_estilo_quantum():
         """, unsafe_allow_html=True)
 
 inyectar_estilo_quantum()
+# ==========================================
+# 🔐 ZONA DE SEGURIDAD (Login Modular)
+# ==========================================
 
+# Llamamos a la función. Si no pasa el login, el código se detiene dentro de la función.
+usuario = login.validar_acceso()
+
+# Si la función retorna None (no logueado), detenemos la app principal aquí.
+if not usuario:
+    st.stop()
+
+# ==========================================
+# 🚀 AQUI COMIENZA TU APP REAL
+# ==========================================
+# A partir de esta línea, SOLO llega quien pasó el login.
+# Ya no necesitas "if not st.session_state.usuario_activo:" ni indentar todo.
+
+st.markdown(f"Hola **{usuario}**, bienvenido al sistema.")
 
 # ==========================================
 # 2. SISTEMA DE ESTADÍSTICAS
@@ -89,24 +106,7 @@ if "sesion_iniciada" not in st.session_state:
     gestionar_estadisticas("nueva_sesion")
     st.session_state.sesion_iniciada = True
 
-# ==========================================
-# 🔐 ZONA DE SEGURIDAD (Login Modular)
-# ==========================================
 
-# Llamamos a la función. Si no pasa el login, el código se detiene dentro de la función.
-usuario = login.validar_acceso()
-
-# Si la función retorna None (no logueado), detenemos la app principal aquí.
-if not usuario:
-    st.stop()
-
-# ==========================================
-# 🚀 AQUI COMIENZA TU APP REAL
-# ==========================================
-# A partir de esta línea, SOLO llega quien pasó el login.
-# Ya no necesitas "if not st.session_state.usuario_activo:" ni indentar todo.
-
-st.markdown(f"Hola **{usuario}**, bienvenido al sistema.")
 
     
 
